@@ -14,4 +14,4 @@ class TeamResponse(TeamBase):
     members: List[UserResponse] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -5,6 +5,6 @@ asyncpg
 python-jose
 pydantic
 python-dotenv
-pydantic_settings
+pydantic-settings
 psycopg2-binary
-email-validator
+asyncpg

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
-from app.models.team import Team
-from app.schemas.team import TeamCreate, TeamResponse
-from app.utils.jwt_verify import verify_token
+from app.models.teams import Team
+from app.schemas.teams import TeamCreate, TeamResponse
+from app.utils.jwt_varify import verify_token
 
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
