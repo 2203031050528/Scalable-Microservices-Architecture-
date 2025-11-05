@@ -15,6 +15,7 @@ async def create_project(data: ProjectCreate, db: AsyncSession = Depends(get_db)
     await db.refresh(project)
     return project
 
+
 @router.get("/", response_model=list[ProjectResponse])
 async def list_projects(db: AsyncSession = Depends(get_db)):
     result = await db.execute("SELECT * FROM projects")
