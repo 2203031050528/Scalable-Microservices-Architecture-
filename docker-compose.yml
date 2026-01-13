@@ -1,0 +1,173 @@
+version: "3.9"
+
+services:
+  gateway:
+    image: nginx:latest
+    container_name: gateway
+    ports:
+      - "8000:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      auth_service:
+        condition: service_healthy
+      user_service:
+        condition: service_healthy
+      project_service:
+        condition: service_healthy
+      notification_service:
+        condition: service_healthy
+
+  auth_service:
+    build:
+      context: ./auth_service
+    container_name: auth_service
+    env_file:
+      - ./auth_service/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://user:pass@db_auth:5432/auth_db
+    depends_on:
+      db_auth:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user_service:
+    build:
+      context: ./user_service
+    container_name: user_service
+    env_file:
+      - ./user_service/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://user:pass@db_user:5432/user_db
+    depends_on:
+      db_user:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  project_service:
+    build:
+      context: ./project_service
+    container_name: project_service
+    env_file:
+      - ./project_service/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://user:pass@db_project:5432/project_db
+    depends_on:
+      db_project:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notification_service:
+    build:
+      context: ./notification_service
+    container_name: notification_service
+    env_file:
+      - ./notification_service/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://user:pass@db_notify:5432/notify_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db_notify:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db_auth:
+    image: postgres:15
+    container_name: db_auth
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: auth_db
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d auth_db -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db_user:
+    image: postgres:15
+    container_name: db_user
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: user_db
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d user_db -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db_project:
+    image: postgres:15
+    container_name: db_project
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: project_db
+    volumes:
+      - project_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d project_db -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db_notify:
+    image: postgres:15
+    container_name: db_notify
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: notify_db
+    volumes:
+      - notify_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d notify_db -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  auth_data:
+  user_data:
+  project_data:
+  notify_data:

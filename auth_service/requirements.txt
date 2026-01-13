@@ -1,0 +1,17 @@
+# Core dependencies
+fastapi
+uvicorn
+python-jose
+sqlalchemy
+psycopg2-binary
+pydantic
+python-dotenv
+pydantic_settings
+# Password hashing
+bcrypt==4.0.1
+passlib[bcrypt]==1.7.4
+redis
+email-validator
+fastapi-mail
+requests-oauthlib
+sendgrid

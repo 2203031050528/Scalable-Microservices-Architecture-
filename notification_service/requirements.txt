@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+aioredis
+sqlalchemy
+asyncpg
+python-dotenv
+email-validator
